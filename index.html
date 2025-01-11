@@ -154,7 +154,7 @@ function showSuggestions(event) {
         suggestions.forEach(suggestion => {
             const suggestionDiv = document.createElement('div');
             suggestionDiv.textContent = suggestion;
-            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, prefix, caretPosition);
+            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, prefix, currentLine);
             suggestionsBox.appendChild(suggestionDiv);
         });
     } else {
@@ -162,18 +162,14 @@ function showSuggestions(event) {
     }
 }
 
-function selectSuggestion(suggestion, textArea, prefix, caretPosition) {
+function selectSuggestion(suggestion, textArea, prefix, currentLine) {
     const input = textArea.value;
-    const lines = input.split('\n');
-    const lineIndex = lines.findIndex(line => input.substr(0, caretPosition).endsWith(line));
-    
-    if (lineIndex !== -1) {
-        // Replace the matched line with the updated suggestion
-        lines[lineIndex] = `${prefix}${suggestion}`;
-    }
 
-    textArea.value = lines.join('\n');
-    textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+    // Replace the current line completely with the updated text
+    const updatedInput = input.replace(currentLine, `${prefix}${suggestion}`);
+
+    textArea.value = updatedInput;
+    textArea.selectionStart = textArea.selectionEnd = updatedInput.length;
     textArea.focus();
 
     document.getElementById('suggestions').style.display = 'none';
