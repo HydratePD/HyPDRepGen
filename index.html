@@ -135,19 +135,21 @@
 function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
     const input = textArea.value;
 
-    // Calculate the start and end of the current line
+    // Calculate start and end positions of the current line
     const lines = input.split('\n');
     const currentLineIndex = input.substr(0, caretPosition).split('\n').length - 1;
     const currentLine = lines[currentLineIndex];
 
-    // Replace the current line with the prefix and suggestion
+    // Replace the matching part of the current line with the full suggestion
     const prefix = currentLine.substring(0, prefixLength);
-    lines[currentLineIndex] = `${prefix}${suggestion}`;
-    const updatedInput = lines.join('\n');
+    const updatedLine = `${prefix}${suggestion}`;
+    lines[currentLineIndex] = updatedLine;
 
-    // Update the textarea and caret position
-    textArea.value = updatedInput;
-    const newCaretPosition = input.substr(0, caretPosition).lastIndexOf(currentLine) + prefix.length + suggestion.length;
+    // Update the entire textarea content
+    textArea.value = lines.join('\n');
+
+    // Set caret position to the end of the updated suggestion
+    const newCaretPosition = input.substr(0, caretPosition).lastIndexOf(currentLine) + updatedLine.length;
     textArea.selectionStart = textArea.selectionEnd = newCaretPosition;
 
     // Hide the suggestions box
