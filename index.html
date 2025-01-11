@@ -164,7 +164,7 @@
         function selectSuggestion(suggestion, textArea, caretPosition, prefix) {
             const input = textArea.value;
             const currentLineStart = input.lastIndexOf('\n', caretPosition - prefix.length - 1) + 1;
-            const newText = input.substr(0, currentLineStart) + prefix + suggestion + '\n' + input.substr(caretPosition);
+            const newText = input.substr(0, currentLineStart) + prefix + suggestion + '\n' + input.substr(currentLineStart + prefix.length);
 
             textArea.value = newText;
             textArea.selectionStart = textArea.selectionEnd = currentLineStart + prefix.length + suggestion.length + 1;
