@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 20px;
+            display: block;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #txtIncident {
+            height: 200px;
+        }
+        #btnCopyReport {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #btnCopyReport:hover {
+            background-color: #45a049;
+        }
+        #suggestions {
+            display: none;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+            position: absolute;
+            width: calc(100% - 40px);
+            z-index: 1000;
+        }
+        #suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        #suggestions div:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <label for="txtSuspects">Suspects</label>
+        <textarea id="txtSuspects"></textarea>
+
+        <label for="txtCharges">Charges</label>
+        <textarea id="txtCharges" oninput="showSuggestions(event)" onclick="showSuggestions(event)"></textarea>
+        <div id="suggestions"></div>
+
+        <label for="txtEvidence">Evidence</label>
+        <textarea id="txtEvidence"></textarea>
+
+        <label for="txtIncident">Incident</label>
+        <textarea id="txtIncident"></textarea>
+
+        <button id="btnCopyReport" onclick="copyReport()">COPY REPORT</button>
+    </div>
+
+    <script>
+        const charges = [
+            "Animal Cruelty", "Drug Trafficking", "Possession of a Dangerous Controlled Substance",
+            "Unlicensed Fishing", "Unlicensed Hunting", "Aggravated Assault",
+            "Assault with a Deadly Weapon or Firearm", "Attempted Murder",
+            "Attempted Murder of a Vulnerable Public Servant", "Common Assault", "Criminal Threats",
+            "Desecration of a Human Corpse", "Extortion", "Fraud", "Gang Related Shooting", "Murder",
+            "Impersonating", "Involuntary Manslaughter", "Kidnapping", "Murder of a Vulnerable Public Servant",
+            "Possession of a Stolen Identification", "Public Lewdness", "Reckless Endangerment",
+            "Unlawful Imprisonment", "Unlawful Imprisonment of a Public Servant or Police",
+            "Bribery of a Government Official", "Contempt of Court", "Coveting a Family Member",
+            "Criminal Possession of Stolen Property", "Elopement Without Permission (ERP)",
+            "Embezzlement", "Failure to Appear", "Jailbreak", "Perjury",
+            "Possession of Contraband in a Government Facility", "Resisting Arrest",
+            "Unauthorized Practice of Law", "Unauthorized Practice of Medicine",
+            "Violating a Court Order", "Arson", "Breach of a Serious Crime", "Disorderly Conduct",
+            "Disturbing the Peace", "Evidence Tampering", "Failure to Comply with a Police Officer",
+            "False Reporting", "Felony Obstruction", "Felony Trespassing", "Government Corruption",
+            "Harboring a Fugitive", "Littering", "Loitering on Government Properties", "Outlaw Order",
+            "Public Intoxication", "Riot", "Stalking", "Trespassing", "Vandalism",
+            "Vandalism of Government Property", "Witness Tampering", "Armed Robbery", "Burglary",
+            "Grand Larceny / Robbery", "Money Laundering", "Petty Theft",
+            "Possession of Government-Issued Items", "Robbery", "Theft of a Vehicle",
+            "Theft of a Water Vehicle", "Theft of an Aircraft", "Driving an Unroadworthy Motor Vehicle",
+            "Driving While Under the Influence", "Evading", "Failure to Stop",
+            "Failure to Wear a Helmet", "Illegal Passing", "Illegal U-Turn", "Jaywalking",
+            "Negligent Driving", "Reckless Evading", "Speeding", "Unlicensed Operation of Vehicle",
+            "Using a Mobile Phone While Driving", "Brandishing a Weapon",
+            "Criminal Possession of Weapon Class A (Pistols)",
+            "Criminal Possession of Weapon Class B (Firearms)",
+            "Criminal Possession of Weapon Class C (Explosives and Heavy Weaponry)",
+            "Criminal Possession of Weapon Class D (Snipers)",
+            "Criminal Sale of Weapon Class A (Pistols)", "Criminal Sale of Weapon Class B (Firearms)",
+            "Criminal Sale of Weapon Class C (Explosives and Heavy Weaponry)",
+            "Criminal Sale of Weapon Class D (Snipers)", "Criminal Use of Explosives",
+            "Possession of a Firearm Without Legal Authority", "Possession of Illegal Firearm Modifications",
+            "Weapon Trafficking"
+        ];
+
+        function showSuggestions(event) {
+            const input = event.target.value;
+            const suggestions = charges.filter(charge => charge.toLowerCase().includes(input.toLowerCase()));
+            const suggestionsBox = document.getElementById('suggestions');
+            suggestionsBox.innerHTML = '';
+            if (suggestions.length > 0) {
+                suggestionsBox.style.display = 'block';
+                suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+                    suggestionDiv.onclick = () => selectSuggestion(suggestion);
+                    suggestionsBox.appendChild(suggestionDiv);
+                });
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        }
+
+        function selectSuggestion(suggestion) {
+            const txtCharges = document.getElementById('txtCharges');
+            const currentLine = txtCharges.value.substr(0, txtCharges.selectionStart).split('\n').pop();
+            const prefix = currentLine.match(/^\d+x\s*/) ? currentLine.match(/^\d+x\s*/)[0] : '';
+            const newLine = prefix + suggestion + '\n';
+            const newValue = txtCharges.value.substr(0, txtCharges.selectionStart - currentLine.length) + newLine + txtCharges.value.substr(txtCharges.selectionStart);
+            txtCharges.value = newValue;
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        function copyReport() {
+            const suspects = document.getElementById('txtSuspects').value.trim();
+            const charges = document.getElementById('txtCharges').value.trim();
+            const evidence = document.getElementById('txtEvidence').value.trim();
+            const incident = document.getElementById('txtIncident').value.trim();
+
+            const suspectsList = addBulletPoints(suspects);
+            const chargesList = addBulletPoints(charges);
+            const evidenceList = addBulletPoints(evidence);
+
+            const dashLine = "-----------------------------------------------------------------------";
+
+            const report = `Suspects Names:\n${suspectsList}\n${dashLine}\n\nCharges:\n${chargesList}\n${dashLine}\n\nEvidence:\n${evidenceList || '• No evidence supplied'}\n${dashLine}\n\nIncident Report:\n${incident}\n${dashLine}\n\nSigned:`;
+
+            navigator.clipboard.writeText(report).then(() => {
+                alert("Report copied to clipboard. Chu is the greatest!");
+            }).catch(err => {
+                alert("An error occurred: " + err);
+            });
+        }
+
+        function addBulletPoints(inputText) {
+            if (!inputText.trim()) {
+                return "• No information provided";
+            }
+            return inputText.split(/\r?\n/).map(line => "• " + line.trim()).join('\n');
+        }
+    </script>
+</body>
+</html>
