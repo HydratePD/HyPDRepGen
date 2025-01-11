@@ -132,47 +132,53 @@
             "Weapon Trafficking"
         ];
 
-        function showSuggestions(event) {
-            const input = event.target.value;
-            const caretPosition = event.target.selectionStart;
-            const currentLine = input.substr(0, caretPosition).split('\n').pop();
-            const match = currentLine.match(/^(\d+x\s+)(.*)/);
+function showSuggestions(event) {
+    const input = event.target.value;
+    const caretPosition = event.target.selectionStart;
+    const currentLine = input.substr(0, caretPosition).split('\n').pop();
+    const match = currentLine.match(/^(\d+x\s+)(.*)/);
 
-            if (!match || match[2].trim().length === 0) {
-                document.getElementById('suggestions').style.display = 'none';
-                return;
-            }
+    if (!match || match[2].trim().length === 0) {
+        document.getElementById('suggestions').style.display = 'none';
+        return;
+    }
 
-            const prefix = match[1]; // Capture the prefix like '1x '
-            const searchTerm = match[2].toLowerCase(); // Only match after the prefix
-            const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
-            const suggestionsBox = document.getElementById('suggestions');
-            suggestionsBox.innerHTML = '';
+    const prefix = match[1]; // Capture '1x ' or similar prefix
+    const searchTerm = match[2].toLowerCase(); // The user's typed text
+    const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
+    const suggestionsBox = document.getElementById('suggestions');
+    suggestionsBox.innerHTML = '';
 
-            if (suggestions.length > 0) {
-                suggestionsBox.style.display = 'block';
-                suggestions.forEach(suggestion => {
-                    const suggestionDiv = document.createElement('div');
-                    suggestionDiv.textContent = suggestion;
-                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, prefix, match[2]);
-                    suggestionsBox.appendChild(suggestionDiv);
-                });
-            } else {
-                suggestionsBox.style.display = 'none';
-            }
-        }
+    if (suggestions.length > 0) {
+        suggestionsBox.style.display = 'block';
+        suggestions.forEach(suggestion => {
+            const suggestionDiv = document.createElement('div');
+            suggestionDiv.textContent = suggestion;
+            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, prefix, caretPosition);
+            suggestionsBox.appendChild(suggestionDiv);
+        });
+    } else {
+        suggestionsBox.style.display = 'none';
+    }
+}
 
-        function selectSuggestion(suggestion, textArea, caretPosition, prefix, searchTerm) {
-            const input = textArea.value;
-            const currentLineStart = input.lastIndexOf('\n', caretPosition - prefix.length - searchTerm.length) + 1;
-            const newText = input.substr(0, currentLineStart) + prefix + suggestion + '\n' + input.substr(caretPosition);
+function selectSuggestion(suggestion, textArea, prefix, caretPosition) {
+    const input = textArea.value;
+    const lines = input.split('\n');
+    const lineIndex = lines.findIndex(line => input.substr(0, caretPosition).endsWith(line));
+    
+    if (lineIndex !== -1) {
+        // Replace the matched line with the updated suggestion
+        lines[lineIndex] = `${prefix}${suggestion}`;
+    }
 
-            textArea.value = newText;
-            textArea.selectionStart = textArea.selectionEnd = currentLineStart + prefix.length + suggestion.length;
-            textArea.focus();
+    textArea.value = lines.join('\n');
+    textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+    textArea.focus();
 
-            document.getElementById('suggestions').style.display = 'none';
-        }
+    document.getElementById('suggestions').style.display = 'none';
+}
+
 
 
         function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
