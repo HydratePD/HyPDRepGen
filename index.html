@@ -132,47 +132,20 @@
             "Weapon Trafficking"
         ];
 
-function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
-    const input = textArea.value;
-
-    // Identify the start of the current line
-    const beforeCaret = input.substring(0, caretPosition);
-    const afterCaret = input.substring(caretPosition);
-    const lineStart = beforeCaret.lastIndexOf('\n') + 1;
-    const currentLine = beforeCaret.substring(lineStart);
-
-    // Replace the part of the current line after '1x ' with the suggestion
-    const updatedLine = `1x ${suggestion}`; // Only replace after '1x' with the suggestion
-    const updatedText = `${input.substring(0, lineStart)}${updatedLine}${afterCaret}`;
-
-    // Update the textarea content
-    textArea.value = updatedText;
-
-    // Move caret to the end of the updated suggestion
-    const newCaretPosition = lineStart + updatedLine.length;
-    textArea.selectionStart = textArea.selectionEnd = newCaretPosition;
-
-    // Hide the suggestions box
-    document.getElementById('suggestions').style.display = 'none';
-}
-
 function showSuggestions(event) {
-    const input = event.target.value;
-    const caretPosition = event.target.selectionStart;
+    const input = event.target;
+    const caretPosition = input.selectionStart;
+    const currentText = input.value;
+    const currentLine = currentText.substr(0, caretPosition).split('\n').pop();
+    const match = currentLine.match(/^\d+x\s+(.*)/);
 
-    // Extract the current line up to the caret position
-    const beforeCaret = input.substring(0, caretPosition);
-    const currentLine = beforeCaret.split('\n').pop();
-
-    // Match for the "1x " prefix and a potential search term
-    const match = currentLine.match(/^(\d+x\s+)(.*)/);
-
-    if (!match || match[2].trim().length === 0) {
+    // If no match or empty charge input, hide suggestions and return
+    if (!match || match[1].trim().length === 0) {
         document.getElementById('suggestions').style.display = 'none';
         return;
     }
 
-    const searchTerm = match[2].toLowerCase();
+    const searchTerm = match[1].toLowerCase();
     const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
     const suggestionsBox = document.getElementById('suggestions');
     suggestionsBox.innerHTML = '';
@@ -182,10 +155,7 @@ function showSuggestions(event) {
         suggestions.forEach(suggestion => {
             const suggestionDiv = document.createElement('div');
             suggestionDiv.textContent = suggestion;
-
-            // Pass necessary data to `selectSuggestion`
-            suggestionDiv.onclick = () =>
-                selectSuggestion(suggestion, event.target, caretPosition, match[2], match[1].length);
+            suggestionDiv.onclick = () => selectSuggestion(suggestion, input, caretPosition, match[1], match[0].length - match[1].length);
             suggestionsBox.appendChild(suggestionDiv);
         });
     } else {
@@ -193,7 +163,22 @@ function showSuggestions(event) {
     }
 }
 
+function selectSuggestion(suggestion, input, caretPosition, searchText, chargeLength) {
+    const currentText = input.value;
+    
+    // Insert the suggestion with the prefix '1x ' and a newline character
+    const newText = currentText.substr(0, caretPosition - chargeLength) + `1x ${suggestion}\n` + currentText.substr(caretPosition);
 
+    // Replace the value in the input with the new text
+    input.value = newText;
+
+    // Move the caret to the correct position after the inserted charge text
+    const newCaretPosition = caretPosition - chargeLength + `1x ${suggestion}`.length + 1; // +1 for the newline character
+    input.setSelectionRange(newCaretPosition, newCaretPosition);
+
+    // Hide the suggestions after selecting one
+    document.getElementById('suggestions').style.display = 'none';
+}
 
 
 
