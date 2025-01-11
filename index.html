@@ -135,16 +135,14 @@
 function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
     const input = textArea.value;
 
-    // Identify the full text up to the current caret position
+    // Identify the start of the current line
     const beforeCaret = input.substring(0, caretPosition);
     const afterCaret = input.substring(caretPosition);
-
-    // Identify the start of the current line
     const lineStart = beforeCaret.lastIndexOf('\n') + 1;
     const currentLine = beforeCaret.substring(lineStart);
 
-    // Replace the part of the line after the prefix with the suggestion
-    const updatedLine = `${currentLine.substring(0, prefixLength)}${suggestion}`;
+    // Replace the part of the current line after '1x ' with the suggestion
+    const updatedLine = `1x ${suggestion}`; // Only replace after '1x' with the suggestion
     const updatedText = `${input.substring(0, lineStart)}${updatedLine}${afterCaret}`;
 
     // Update the textarea content
@@ -194,6 +192,7 @@ function showSuggestions(event) {
         suggestionsBox.style.display = 'none';
     }
 }
+
 
 
 
