@@ -61,11 +61,9 @@
             max-height: 150px;
             overflow-y: auto;
             background-color: white;
+            z-index: 1000;
             position: absolute;
             width: calc(100% - 40px);
-            z-index: 1000;
-            top: calc(100% + 8px);
-            left: 20px;
             box-sizing: border-box;
         }
         #suggestions div {
@@ -136,15 +134,26 @@
 
         function showSuggestions(event) {
             const input = event.target.value;
-            const suggestions = charges.filter(charge => charge.toLowerCase().includes(input.toLowerCase()));
+            const caretPosition = event.target.selectionStart;
+            const currentLine = input.substr(0, caretPosition).split('\n').pop();
+            const match = currentLine.match(/^\d+x\s*(.*)/);
+
+            if (!match) {
+                document.getElementById('suggestions').style.display = 'none';
+                return;
+            }
+
+            const searchTerm = match[1].toLowerCase();
+            const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
             const suggestionsBox = document.getElementById('suggestions');
             suggestionsBox.innerHTML = '';
+
             if (suggestions.length > 0) {
                 suggestionsBox.style.display = 'block';
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
-                    suggestionDiv.onclick = () => selectSuggestion(suggestion);
+                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[0]);
                     suggestionsBox.appendChild(suggestionDiv);
                 });
             } else {
@@ -152,13 +161,15 @@
             }
         }
 
-        function selectSuggestion(suggestion) {
-            const txtCharges = document.getElementById('txtCharges');
-            const currentLine = txtCharges.value.substr(0, txtCharges.selectionStart).split('\n').pop();
-            const prefix = currentLine.match(/^\d+x\s*/) ? currentLine.match(/^\d+x\s*/)[0] : '';
-            const newLine = prefix + suggestion + '\n';
-            const newValue = txtCharges.value.substr(0, txtCharges.selectionStart - currentLine.length) + newLine + txtCharges.value.substr(txtCharges.selectionStart);
-            txtCharges.value = newValue;
+        function selectSuggestion(suggestion, textArea, caretPosition, prefix) {
+            const input = textArea.value;
+            const currentLineStart = input.lastIndexOf('\n', caretPosition - prefix.length - 1) + 1;
+            const newText = input.substr(0, currentLineStart) + prefix + suggestion + '\n' + input.substr(caretPosition);
+
+            textArea.value = newText;
+            textArea.selectionStart = textArea.selectionEnd = currentLineStart + prefix.length + suggestion.length + 1;
+            textArea.focus();
+
             document.getElementById('suggestions').style.display = 'none';
         }
 
