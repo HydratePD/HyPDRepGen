@@ -136,14 +136,15 @@
             const input = event.target.value;
             const caretPosition = event.target.selectionStart;
             const currentLine = input.substr(0, caretPosition).split('\n').pop();
-            const match = currentLine.match(/^\d+x\s+(.*)/);
+            const match = currentLine.match(/^(\d+x\s+)(.*)/);
 
-            if (!match || match[1].trim().length === 0) {
+            if (!match || match[2].trim().length === 0) {
                 document.getElementById('suggestions').style.display = 'none';
                 return;
             }
 
-            const searchTerm = match[1].toLowerCase();
+            const prefix = match[1]; // Capture the prefix like '1x '
+            const searchTerm = match[2].toLowerCase(); // Only match after the prefix
             const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
             const suggestionsBox = document.getElementById('suggestions');
             suggestionsBox.innerHTML = '';
@@ -153,13 +154,26 @@
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
-                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[1], match[0].length - match[1].length);
+                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, prefix, match[2]);
                     suggestionsBox.appendChild(suggestionDiv);
                 });
             } else {
                 suggestionsBox.style.display = 'none';
             }
         }
+
+        function selectSuggestion(suggestion, textArea, caretPosition, prefix, searchTerm) {
+            const input = textArea.value;
+            const currentLineStart = input.lastIndexOf('\n', caretPosition - prefix.length - searchTerm.length) + 1;
+            const newText = input.substr(0, currentLineStart) + prefix + suggestion + '\n' + input.substr(caretPosition);
+
+            textArea.value = newText;
+            textArea.selectionStart = textArea.selectionEnd = currentLineStart + prefix.length + suggestion.length;
+            textArea.focus();
+
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
 
         function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
             const input = textArea.value;
