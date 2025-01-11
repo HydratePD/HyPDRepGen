@@ -135,21 +135,23 @@
 function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
     const input = textArea.value;
 
-    // Calculate start and end positions of the current line
-    const lines = input.split('\n');
-    const currentLineIndex = input.substr(0, caretPosition).split('\n').length - 1;
-    const currentLine = lines[currentLineIndex];
+    // Identify the full text up to the current caret position
+    const beforeCaret = input.substring(0, caretPosition);
+    const afterCaret = input.substring(caretPosition);
 
-    // Replace the matching part of the current line with the full suggestion
-    const prefix = currentLine.substring(0, prefixLength);
-    const updatedLine = `${prefix}${suggestion}`;
-    lines[currentLineIndex] = updatedLine;
+    // Identify the start of the current line
+    const lineStart = beforeCaret.lastIndexOf('\n') + 1;
+    const currentLine = beforeCaret.substring(lineStart);
 
-    // Update the entire textarea content
-    textArea.value = lines.join('\n');
+    // Replace the part of the line after the prefix with the suggestion
+    const updatedLine = `${currentLine.substring(0, prefixLength)}${suggestion}`;
+    const updatedText = `${input.substring(0, lineStart)}${updatedLine}${afterCaret}`;
 
-    // Set caret position to the end of the updated suggestion
-    const newCaretPosition = input.substr(0, caretPosition).lastIndexOf(currentLine) + updatedLine.length;
+    // Update the textarea content
+    textArea.value = updatedText;
+
+    // Move caret to the end of the updated suggestion
+    const newCaretPosition = lineStart + updatedLine.length;
     textArea.selectionStart = textArea.selectionEnd = newCaretPosition;
 
     // Hide the suggestions box
@@ -159,7 +161,12 @@ function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefi
 function showSuggestions(event) {
     const input = event.target.value;
     const caretPosition = event.target.selectionStart;
-    const currentLine = input.substr(0, caretPosition).split('\n').pop();
+
+    // Extract the current line up to the caret position
+    const beforeCaret = input.substring(0, caretPosition);
+    const currentLine = beforeCaret.split('\n').pop();
+
+    // Match for the "1x " prefix and a potential search term
     const match = currentLine.match(/^(\d+x\s+)(.*)/);
 
     if (!match || match[2].trim().length === 0) {
@@ -177,13 +184,17 @@ function showSuggestions(event) {
         suggestions.forEach(suggestion => {
             const suggestionDiv = document.createElement('div');
             suggestionDiv.textContent = suggestion;
-            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[2], match[1].length);
+
+            // Pass necessary data to `selectSuggestion`
+            suggestionDiv.onclick = () =>
+                selectSuggestion(suggestion, event.target, caretPosition, match[2], match[1].length);
             suggestionsBox.appendChild(suggestionDiv);
         });
     } else {
         suggestionsBox.style.display = 'none';
     }
 }
+
 
 
 
