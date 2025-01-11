@@ -143,8 +143,8 @@ function showSuggestions(event) {
         return;
     }
 
-    const prefix = match[1]; // Capture '1x ' or similar prefix
-    const searchTerm = match[2].toLowerCase(); // The user's typed text
+    const prefix = match[1]; // Extract '1x ' or similar
+    const searchTerm = match[2].toLowerCase(); // The partial text the user typed
     const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
     const suggestionsBox = document.getElementById('suggestions');
     suggestionsBox.innerHTML = '';
@@ -165,15 +165,16 @@ function showSuggestions(event) {
 function selectSuggestion(suggestion, textArea, prefix, currentLine) {
     const input = textArea.value;
 
-    // Replace the current line completely with the updated text
+    // Replace only the current line with the selected suggestion
     const updatedInput = input.replace(currentLine, `${prefix}${suggestion}`);
 
-    textArea.value = updatedInput;
-    textArea.selectionStart = textArea.selectionEnd = updatedInput.length;
+    textArea.value = updatedInput; // Set the new value for the textarea
+    textArea.selectionStart = textArea.selectionEnd = updatedInput.length; // Move cursor to end
     textArea.focus();
 
-    document.getElementById('suggestions').style.display = 'none';
+    document.getElementById('suggestions').style.display = 'none'; // Hide suggestions
 }
+
 
 
 
