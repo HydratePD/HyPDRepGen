@@ -153,7 +153,7 @@
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
-                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[1]);
+                    suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[1], match[0].length - match[1].length);
                     suggestionsBox.appendChild(suggestionDiv);
                 });
             } else {
@@ -161,10 +161,10 @@
             }
         }
 
-        function selectSuggestion(suggestion, textArea, caretPosition, searchTerm) {
+        function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
             const input = textArea.value;
             const currentLineStart = input.lastIndexOf('\n', caretPosition - searchTerm.length - 1) + 1;
-            const newText = input.substr(0, currentLineStart) + input.substr(currentLineStart).replace(searchTerm, suggestion) + '\n' + input.substr(caretPosition);
+            const newText = input.substr(0, currentLineStart + prefixLength) + suggestion + '\n' + input.substr(currentLineStart + prefixLength + searchTerm.length);
 
             textArea.value = newText;
             textArea.selectionStart = textArea.selectionEnd = currentLineStart + suggestion.length + 1;
