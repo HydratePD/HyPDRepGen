@@ -132,6 +132,24 @@
             "Weapon Trafficking"
         ];
 
+function selectSuggestion(suggestion, textArea, caretPosition, searchTerm, prefixLength) {
+    const input = textArea.value;
+    const currentLine = input.substr(0, caretPosition).split('\n').pop();
+    
+    // Extract the prefix (e.g., '1x ')
+    const prefix = currentLine.substring(0, prefixLength);
+
+    // Replace the entire current line with the prefix and suggestion
+    const updatedInput = input.replace(currentLine, `${prefix}${suggestion}`);
+
+    // Update the textarea and set the caret position
+    textArea.value = updatedInput;
+    textArea.selectionStart = textArea.selectionEnd = caretPosition - currentLine.length + (prefix + suggestion).length;
+
+    // Hide the suggestions box
+    document.getElementById('suggestions').style.display = 'none';
+}
+
 function showSuggestions(event) {
     const input = event.target.value;
     const caretPosition = event.target.selectionStart;
@@ -143,8 +161,7 @@ function showSuggestions(event) {
         return;
     }
 
-    const prefix = match[1]; // Extract '1x ' or similar
-    const searchTerm = match[2].toLowerCase(); // The partial text the user typed
+    const searchTerm = match[2].toLowerCase();
     const suggestions = charges.filter(charge => charge.toLowerCase().includes(searchTerm));
     const suggestionsBox = document.getElementById('suggestions');
     suggestionsBox.innerHTML = '';
@@ -154,7 +171,7 @@ function showSuggestions(event) {
         suggestions.forEach(suggestion => {
             const suggestionDiv = document.createElement('div');
             suggestionDiv.textContent = suggestion;
-            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, prefix, currentLine);
+            suggestionDiv.onclick = () => selectSuggestion(suggestion, event.target, caretPosition, match[2], match[1].length);
             suggestionsBox.appendChild(suggestionDiv);
         });
     } else {
@@ -162,18 +179,6 @@ function showSuggestions(event) {
     }
 }
 
-function selectSuggestion(suggestion, textArea, prefix, currentLine) {
-    const input = textArea.value;
-
-    // Replace only the current line with the selected suggestion
-    const updatedInput = input.replace(currentLine, `${prefix}${suggestion}`);
-
-    textArea.value = updatedInput; // Set the new value for the textarea
-    textArea.selectionStart = textArea.selectionEnd = updatedInput.length; // Move cursor to end
-    textArea.focus();
-
-    document.getElementById('suggestions').style.display = 'none'; // Hide suggestions
-}
 
 
 
