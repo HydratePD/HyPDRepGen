@@ -136,9 +136,9 @@
             const input = event.target.value;
             const caretPosition = event.target.selectionStart;
             const currentLine = input.substr(0, caretPosition).split('\n').pop();
-            const match = currentLine.match(/^\d+x\s*(.*)/);
+            const match = currentLine.match(/^\d+x\s+(.*)/);
 
-            if (!match) {
+            if (!match || match[1].trim().length === 0) {
                 document.getElementById('suggestions').style.display = 'none';
                 return;
             }
