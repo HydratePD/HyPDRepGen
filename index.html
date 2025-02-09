@@ -166,17 +166,16 @@ function showSuggestions(event) {
 function selectSuggestion(suggestion, input, caretPosition, searchText, chargeLength) {
     const currentText = input.value;
     
-    // Insert the suggestion with the prefix '1x ' and a newline character
+    // inserts prefix prior to suggestion rather than erasing it.. still unsure
     const newText = currentText.substr(0, caretPosition - chargeLength) + `1x ${suggestion}\n` + currentText.substr(caretPosition);
 
-    // Replace the value in the input with the new text
     input.value = newText;
 
-    // Move the caret to the correct position after the inserted charge text
-    const newCaretPosition = caretPosition - chargeLength + `1x ${suggestion}`.length + 1; // +1 for the newline character
+    // Move text caret to the next line, need to fix, not working as intended like VB did
+    const newCaretPosition = caretPosition - chargeLength + `1x ${suggestion}`.length + 1; // +1 for newline
     input.setSelectionRange(newCaretPosition, newCaretPosition);
 
-    // Hide the suggestions after selecting one
+    // Remove displaying the..... suggestions
     document.getElementById('suggestions').style.display = 'none';
 }
 
