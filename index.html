@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<div id="container">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Generator</title>
     <style>
-body {
-    background-color: black; /* Unused background is black */
-    color: white; /* Ensures text remains readable */
-    margin: 0; /* Removes default margins */
-    padding: 0;
-}
-
-#container { 
-    background-color: #0a1a2f; /* Dark blue for the content area */
-    width: 80%; /* Adjust width to your preference */
-    margin: auto; /* Centers the content */
-    padding: 20px;
-    border-radius: 10px; /* Optional: Adds rounded corners */
-}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #298bd6;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+        }
         label {
             font-weight: bold;
             margin-top: 20px;
@@ -223,7 +225,4 @@ function selectSuggestion(suggestion, input, caretPosition, searchText, chargeLe
         }
     </script>
 </body>
-
-</div>
-
 </html>
